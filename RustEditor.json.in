@@ -12,6 +12,17 @@
     \"Category\" : \"Other Languages\",
     \"Description\" : \"Rust editor component.\",
     \"Url\" : \"\",
-    $$dependencyList
+    $$dependencyList,
+
+    \"Mimetypes\" : \"
+    <?xml version=\'1.0\'?>
+    <mime-info xmlns=\'http://www.freedesktop.org/standards/shared-mime-info\'>
+        <mime-type type=\'text/x-rustsrc\'>
+            <sub-class-of type=\'text/x-csrc\'/>
+            <comment>Rust source code</comment>
+            <glob pattern=\'*.rs\'/>
+        </mime-type>
+    </mime-info>
+    \"
 }
 

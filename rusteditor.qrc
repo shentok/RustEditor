@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/rusteditor">
-        <file>RustEditor.mimetypes.xml</file>
         <file>images/attribute.png</file>
         <file>images/const.png</file>
         <file>images/func.png</file>

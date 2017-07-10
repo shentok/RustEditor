@@ -28,23 +28,6 @@ HEADERS += rusteditorplugin.h \
 
 # Qt Creator linking
 
-## Set QTC Version
-QTC_MAJ = $$(QTC_MAJOR)
-QTC_MIN = $$(QTC_MINOR)
-isEmpty(QTC_MAJ) || isEmpty(QTC_MIN){
-    QTC_MAJ = $$QTC_MAJOR
-    QTC_MIN = $$QTC_MINOR
-}
-isEmpty(QTC_MAJ) || isEmpty(QTC_MIN){
-    QTC_MAJ = 3
-    QTC_MIN = 6
-}
-
-DEFINES += "QTC_VERSION_MAJOR=$${QTC_MAJ}"
-DEFINES += "QTC_VERSION_MINOR=$${QTC_MIN}"
-message("Target Qt Creator version: $${QTC_MAJ}.$${QTC_MIN}")
-
-
 ## set the QTC_SOURCE environment variable to override the setting here
 QTCREATOR_SOURCES = $$(QTC_SOURCE)
 isEmpty(QTCREATOR_SOURCES):QTCREATOR_SOURCES=$$QTC_SOURCE
@@ -91,6 +74,23 @@ QTC_PLUGIN_RECOMMENDS += \
 ###### End _dependencies.pri contents ######
 
 include($$QTCREATOR_SOURCES/src/qtcreatorplugin.pri)
+
+## Set QTC Version
+QTC_MAJ = $$(QTC_MAJOR)
+QTC_MIN = $$(QTC_MINOR)
+isEmpty(QTC_MAJ) || isEmpty(QTC_MIN){
+    QTC_MAJ = $$QTC_MAJOR
+    QTC_MIN = $$QTC_MINOR
+}
+isEmpty(QTC_MAJ) || isEmpty(QTC_MIN){
+    QTC_VERSIONS=$$split(QTCREATOR_VERSION, .)
+    QTC_MAJ = $$first(QTC_VERSIONS)
+    QTC_MIN = $$member(QTC_VERSIONS, 1)
+}
+
+DEFINES += "QTC_VERSION_MAJOR=$${QTC_MAJ}"
+DEFINES += "QTC_VERSION_MINOR=$${QTC_MIN}"
+message("Target Qt Creator version: $${QTC_MAJ}.$${QTC_MIN}")
 
 RESOURCES += \
     rusteditor.qrc

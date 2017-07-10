@@ -31,7 +31,7 @@ RustSettingsPage::RustSettingsPage(QObject *parent):
     setDisplayName(tr("Rust Configurations"));
     setCategory(Constants::RUSTEDITOR_SETTINGS_CATEGORY);
     setDisplayCategory(QCoreApplication::translate("Rust",Constants::RUSTEDITOR_SETTINGS_TR_CATEGORY));
-    setCategoryIcon(QLatin1String(Constants::RUSTEDITOR_SETTINGS_CATEGORY_ICON));
+    setCategoryIcon(Utils::Icon(Constants::RUSTEDITOR_SETTINGS_CATEGORY_ICON));
 }
 
 QWidget *RustSettingsPage::widget()

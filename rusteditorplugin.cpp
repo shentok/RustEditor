@@ -31,8 +31,6 @@
 #include <coreplugin/actionmanager/actioncontainer.h>
 #include <coreplugin/coreconstants.h>
 
-#include <utils/mimetypes/mimedatabase.h>
-
 #include <QAction>
 #include <QMessageBox>
 #include <QMainWindow>
@@ -69,8 +67,6 @@ bool RustEditorPlugin::initialize(const QStringList &arguments, QString *errorSt
     new Configuration(this);
 
     addAutoReleasedObject(new RustSettingsPage);
-
-    Utils::MimeDatabase::addMimeTypes(QLatin1String(":/rusteditor/RustEditor.mimetypes.xml"));
     addAutoReleasedObject(new RustEditorFactory);
 
     return true;

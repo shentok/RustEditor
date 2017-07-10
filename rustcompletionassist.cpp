@@ -216,7 +216,7 @@ IAssistProposal *RustCompletionAssistProcessor::perform(const AssistInterface *i
     //Keep the compatibility with 3.x until 4.0 is out
 #if (QTC_VERSION_MAJOR == 3) && (QTC_VERSION_MINOR == 6)
     QList<AssistProposalItem *> m_completions;
-#elif (QTC_VERSION_MAJOR == 4) && (QTC_VERSION_MINOR == 0)
+#elif (QTC_VERSION_MAJOR == 4) && (QTC_VERSION_MINOR >= 0)
     QList<AssistProposalItemInterface *> m_completions; // all possible completions at given point
 #endif
 
