@@ -193,7 +193,7 @@ IAssistProposal *RustCompletionAssistProcessor::perform(const AssistInterface *i
 
     const QTextDocument *doc = interface->textDocument();
 
-    const QString result = runRacer("complete", *doc, interface->position());
+    const QString result = runRacer("complete", *doc, interface->position(), interface->fileName());
 
     //Keep the compatibility with 3.x until 4.0 is out
 #if (QTC_VERSION_MAJOR == 3) && (QTC_VERSION_MINOR == 6)
@@ -251,7 +251,7 @@ bool RustCompletionAssistProcessor::acceptsIdleEditor(const AssistInterface *int
     return isActivationChar(ch);
 }
 
-QString RustCompletionAssistProcessor::runRacer(const QString &command, const QTextDocument &doc, int position)
+QString RustCompletionAssistProcessor::runRacer(const QString &command, const QTextDocument &doc, int position, const QString &fileName)
 {
     //Save the current document to a temporary file so I can call racer on it
     QTemporaryFile tmpsrc;
@@ -290,5 +290,7 @@ QString RustCompletionAssistProcessor::runRacer(const QString &command, const QT
     if (process.exitCode() != 0)
         return QString();
 
-    return QString::fromLatin1(process.readAllStandardOutput());
+    auto foo = QString::fromLatin1(process.readAllStandardOutput());
+
+    return foo.replace(tmpsrc.fileName(), fileName);
 }

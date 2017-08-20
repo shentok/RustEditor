@@ -25,6 +25,8 @@
 #include <texteditor/textdocument.h>
 #include <utils/fileutils.h>
 
+#include <QFileInfo>
+
 using namespace RustEditor::Internal;
 
 RustEditorWidget::RustEditorWidget()
@@ -42,4 +44,32 @@ TextEditor::AssistInterface *RustEditorWidget::createAssistInterface(
                                                  reason);
 
     return TextEditorWidget::createAssistInterface(kind, reason);
+}
+
+TextEditor::TextEditorWidget::Link RustEditorWidget::findLinkAt(
+    const QTextCursor &cursor, bool resolveTarget, bool inNextSplit)
+{
+    const QTextDocument *doc = cursor.document();
+    const QString result = RustCompletionAssistProcessor::runRacer("find-definition", *doc, cursor.position(), textDocument()->filePath().toFileInfo().filePath());
+
+    if (!result.startsWith("MATCH ")) {
+        return Link();
+    }
+
+    const auto list = result.split(",");
+    const auto match = list.at(0).midRef(6);
+
+    const QString plainText = doc->toPlainText();
+
+    for (int pos = cursor.position(); pos >= cursor.position() - match.length() && pos >= 0; --pos) {
+        if (plainText.midRef(pos, match.length()) == match) {
+            auto link = Link(list.at(3), list.at(1).toInt(), list.at(2).toInt());
+            link.linkTextStart = pos;
+            link.linkTextEnd = link.linkTextStart + match.length();
+
+            return link;
+        }
+    }
+
+    return Link();
 }

@@ -58,10 +58,11 @@ public:
 
     TextEditor::IAssistProposal *perform(const TextEditor::AssistInterface *interface) Q_DECL_OVERRIDE;
 
+    static QString runRacer(const QString &command, const QTextDocument &doc, int position, const QString &fileName);
+
 private:
     const QIcon &getRacerIcon(const QString &type);
     static bool acceptsIdleEditor(const TextEditor::AssistInterface *interface);
-    static QString runRacer(const QString &command, const QTextDocument &doc, int position);
 
     QIcon m_keywordIcon;
     QIcon m_varIcon;
