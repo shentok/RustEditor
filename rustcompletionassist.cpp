@@ -189,8 +189,7 @@ const QIcon &RustCompletionAssistProcessor::getRacerIcon(const QString &type){
 
 IAssistProposal *RustCompletionAssistProcessor::perform(const AssistInterface *interface)
 {
-
-    m_interface.reset(static_cast<const RustCompletionAssistInterface *>(interface));
+    m_interface.reset(interface);
 
     if (interface->reason() == IdleEditor && !acceptsIdleEditor())
         return 0;
@@ -288,17 +287,4 @@ bool RustCompletionAssistProcessor::acceptsIdleEditor() const
     }
 
     return isActivationChar(ch);
-}
-
-// -----------------------------
-// RustCompletionAssistInterface
-// -----------------------------
-RustCompletionAssistInterface::RustCompletionAssistInterface(QTextDocument *textDocument,
-                                                             int position,
-                                                             const QString &fileName,
-                                                             AssistReason reason,
-                                                             const QString &mimeType)
-    : AssistInterface(textDocument, position, fileName, reason)
-    , m_mimeType(mimeType)
-{
 }

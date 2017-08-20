@@ -36,11 +36,10 @@ TextEditor::AssistInterface *RustEditorWidget::createAssistInterface(
     TextEditor::AssistKind kind, TextEditor::AssistReason reason) const
 {
     if (kind == TextEditor::Completion)
-        return new RustCompletionAssistInterface(document(),
+        return new TextEditor::AssistInterface(document(),
                                                  position(),
                                                  textDocument()->filePath().toString(),
-                                                 reason,
-                                                 textDocument()->mimeType());
+                                                 reason);
 
     return TextEditorWidget::createAssistInterface(kind, reason);
 }

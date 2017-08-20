@@ -61,7 +61,7 @@ private:
     bool acceptsIdleEditor() const;
 
     int m_startPosition;
-    QScopedPointer<const RustCompletionAssistInterface> m_interface;
+    QScopedPointer<const TextEditor::AssistInterface> m_interface;
 
     QIcon m_keywordIcon;
     QIcon m_varIcon;
@@ -72,20 +72,6 @@ private:
     QIcon m_uniformIcon;
     QIcon m_varyingIcon;
     QIcon m_otherIcon;
-};
-
-class RustCompletionAssistInterface : public TextEditor::AssistInterface
-{
-public:
-    RustCompletionAssistInterface(QTextDocument *textDocument,
-                                  int position, const QString &fileName,
-                                  TextEditor::AssistReason reason,
-                                  const QString &mimeType);
-
-    const QString &mimeType() const { return m_mimeType; }
-
-private:
-    QString m_mimeType;
 };
 
 } // namespace Internal
