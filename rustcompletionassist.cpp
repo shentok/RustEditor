@@ -191,26 +191,9 @@ IAssistProposal *RustCompletionAssistProcessor::perform(const AssistInterface *i
     if (interface->reason() == IdleEditor && !acceptsIdleEditor(interface))
         return 0;
 
-    //Save the current document to a temporary file so I can call racer on it
-    QTemporaryFile tmpsrc;
-    if (!tmpsrc.open())
-        return 0;
-
     const QTextDocument *doc = interface->textDocument();
 
-    {
-        const QString fullDoc = doc->toPlainText();
-        QTextStream tmpstream(&tmpsrc);
-        tmpstream << fullDoc;
-    }
-
-    int pos = interface->position() - 1;
-    QChar ch = interface->characterAt(pos);
-    while (ch.isLetterOrNumber() || ch == QLatin1Char('_'))
-        ch = interface->characterAt(--pos);
-
-    int charnum, linenum;
-    TextEditor::Convenience::convertPosition(doc, interface->position(), &linenum, &charnum);
+    const QString result = runRacer("complete", *doc, interface->position());
 
     //Keep the compatibility with 3.x until 4.0 is out
 #if (QTC_VERSION_MAJOR == 3) && (QTC_VERSION_MINOR == 6)
@@ -219,27 +202,7 @@ IAssistProposal *RustCompletionAssistProcessor::perform(const AssistInterface *i
     QList<AssistProposalItemInterface *> m_completions; // all possible completions at given point
 #endif
 
-    const Settings &rustEditorSettings = Configuration::getSettingsPtr();
-
-    QString rustPath = rustEditorSettings.rustSrcPath().toString();
-    QString racerPath = rustEditorSettings.racerPath().toString();
-    if(!racerPath.isEmpty() && !racerPath.endsWith(QLatin1Char('/'))) racerPath.append(QLatin1Char('/'));
-
-
-    //set environment variable pointing to where rust source is located
-    QStringList env;
-    env << (QLatin1String("RUST_SRC_PATH=")+rustPath);
-
-    //run 'racer complete <linenum> <charnum> <filename>' and retrieve the output
-    QProcess process;
-    process.setEnvironment(env);
-    QStringList params;
-    params << QLatin1String("complete") << QString::number(linenum) << QString::number(charnum) << tmpsrc.fileName();
-    process.start(racerPath+QLatin1String("racer"), params);
-    process.waitForFinished();
-    QString result = QString::fromLatin1(process.readAllStandardOutput());
-
-    if(process.exitCode() == 0){
+    if (!result.isEmpty() == 0){
         QStringList lines = result.split(QLatin1String("\n"));
         foreach (QString l, lines) {
             if(l.left(5) == QString::fromLatin1("MATCH")){
@@ -250,6 +213,10 @@ IAssistProposal *RustCompletionAssistProcessor::perform(const AssistInterface *i
     }else{
         Core::MessageManager::write(result);
     }
+
+    int pos = interface->position() - 1;
+    while (isIdentifierChar(interface->characterAt(pos)))
+        --pos;
 
     return new GenericProposal(pos + 1, m_completions);
 }
@@ -282,4 +249,46 @@ bool RustCompletionAssistProcessor::acceptsIdleEditor(const AssistInterface *int
     }
 
     return isActivationChar(ch);
+}
+
+QString RustCompletionAssistProcessor::runRacer(const QString &command, const QTextDocument &doc, int position)
+{
+    //Save the current document to a temporary file so I can call racer on it
+    QTemporaryFile tmpsrc;
+    if (!tmpsrc.open())
+        return QString();
+
+    {
+        const QString fullDoc = doc.toPlainText();
+        QTextStream tmpstream(&tmpsrc);
+        tmpstream << fullDoc;
+    }
+
+    int charnum, linenum;
+    TextEditor::Convenience::convertPosition(&doc, position, &linenum, &charnum);
+
+    const Settings &rustEditorSettings = Configuration::getSettingsPtr();
+
+    QString rustPath = rustEditorSettings.rustSrcPath().toString();
+    QString racerPath = rustEditorSettings.racerPath().toString();
+    if (!racerPath.isEmpty() && !racerPath.endsWith(QLatin1Char('/')))
+        racerPath.append(QLatin1Char('/'));
+
+    //set environment variable pointing to where rust source is located
+    QStringList env;
+    env << (QLatin1String("RUST_SRC_PATH=")+rustPath);
+
+    //run 'racer complete <linenum> <charnum> <filename>' and retrieve the output
+    QStringList params;
+    params << command << QString::number(linenum) << QString::number(charnum) << tmpsrc.fileName();
+
+    QProcess process;
+    process.setEnvironment(env);
+    process.start(racerPath+QLatin1String("racer"), params);
+    process.waitForFinished();
+
+    if (process.exitCode() != 0)
+        return QString();
+
+    return QString::fromLatin1(process.readAllStandardOutput());
 }

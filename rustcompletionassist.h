@@ -31,6 +31,8 @@
 #include <QSharedPointer>
 #include <QTextCursor>
 
+class QTextDocument;
+
 namespace RustEditor {
 namespace Internal {
 
@@ -59,6 +61,7 @@ public:
 private:
     const QIcon &getRacerIcon(const QString &type);
     static bool acceptsIdleEditor(const TextEditor::AssistInterface *interface);
+    static QString runRacer(const QString &command, const QTextDocument &doc, int position);
 
     QIcon m_keywordIcon;
     QIcon m_varIcon;
