@@ -138,8 +138,7 @@ bool RustCompletionAssistProvider::isActivationCharSequence(const QString &seque
 // RustCompletionAssistProcessor
 // -----------------------------
 RustCompletionAssistProcessor::RustCompletionAssistProcessor()
-    : m_startPosition(0)
-    , m_keywordIcon(QLatin1String(":/rusteditor/images/keyword.png"))
+    : m_keywordIcon(QLatin1String(":/rusteditor/images/keyword.png"))
     , m_varIcon(QLatin1String(":/rusteditor/images/var.png"))
     , m_functionIcon(QLatin1String(":/rusteditor/images/func.png"))
     , m_typeIcon(QLatin1String(":/rusteditor/images/type.png"))
@@ -189,9 +188,7 @@ const QIcon &RustCompletionAssistProcessor::getRacerIcon(const QString &type){
 
 IAssistProposal *RustCompletionAssistProcessor::perform(const AssistInterface *interface)
 {
-    m_interface.reset(interface);
-
-    if (interface->reason() == IdleEditor && !acceptsIdleEditor())
+    if (interface->reason() == IdleEditor && !acceptsIdleEditor(interface))
         return 0;
 
     //Save the current document to a temporary file so I can call racer on it
@@ -199,7 +196,7 @@ IAssistProposal *RustCompletionAssistProcessor::perform(const AssistInterface *i
     if (!tmpsrc.open())
         return 0;
 
-    const QTextDocument *doc = m_interface->textDocument();
+    const QTextDocument *doc = interface->textDocument();
 
     {
         const QString fullDoc = doc->toPlainText();
@@ -207,13 +204,13 @@ IAssistProposal *RustCompletionAssistProcessor::perform(const AssistInterface *i
         tmpstream << fullDoc;
     }
 
-    int pos = m_interface->position() - 1;
-    QChar ch = m_interface->characterAt(pos);
+    int pos = interface->position() - 1;
+    QChar ch = interface->characterAt(pos);
     while (ch.isLetterOrNumber() || ch == QLatin1Char('_'))
-        ch = m_interface->characterAt(--pos);
+        ch = interface->characterAt(--pos);
 
     int charnum, linenum;
-    TextEditor::Convenience::convertPosition(doc, m_interface->position(), &linenum, &charnum);
+    TextEditor::Convenience::convertPosition(doc, interface->position(), &linenum, &charnum);
 
     //Keep the compatibility with 3.x until 4.0 is out
 #if (QTC_VERSION_MAJOR == 3) && (QTC_VERSION_MINOR == 6)
@@ -254,29 +251,27 @@ IAssistProposal *RustCompletionAssistProcessor::perform(const AssistInterface *i
         Core::MessageManager::write(result);
     }
 
-    m_startPosition = pos + 1;
-
-    return new GenericProposal(m_startPosition, m_completions);
+    return new GenericProposal(pos + 1, m_completions);
 }
 
-bool RustCompletionAssistProcessor::acceptsIdleEditor() const
+bool RustCompletionAssistProcessor::acceptsIdleEditor(const AssistInterface *interface)
 {
-    const int cursorPosition = m_interface->position();
-    const QChar ch = m_interface->characterAt(cursorPosition - 1);
+    const int cursorPosition = interface->position();
+    const QChar ch = interface->characterAt(cursorPosition - 1);
 
-    const QChar characterUnderCursor = m_interface->characterAt(cursorPosition);
+    const QChar characterUnderCursor = interface->characterAt(cursorPosition);
 
     if (isIdentifierChar(ch) && (characterUnderCursor.isSpace() ||
                                  characterUnderCursor.isNull() ||
                                  isDelimiter(characterUnderCursor))) {
-        int pos = m_interface->position() - 1;
+        int pos = interface->position() - 1;
         for (; pos != -1; --pos) {
-            if (! isIdentifierChar(m_interface->characterAt(pos)))
+            if (! isIdentifierChar(interface->characterAt(pos)))
                 break;
         }
         ++pos;
 
-        const QString word = m_interface->textAt(pos, cursorPosition - pos);
+        const QString word = interface->textAt(pos, cursorPosition - pos);
         if (word.length() > 2 && checkStartOfIdentifier(word)) {
             for (int i = 0; i < word.length(); ++i) {
                 if (! isIdentifierChar(word.at(i)))

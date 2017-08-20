@@ -58,10 +58,7 @@ public:
 
 private:
     const QIcon &getRacerIcon(const QString &type);
-    bool acceptsIdleEditor() const;
-
-    int m_startPosition;
-    QScopedPointer<const TextEditor::AssistInterface> m_interface;
+    static bool acceptsIdleEditor(const TextEditor::AssistInterface *interface);
 
     QIcon m_keywordIcon;
     QIcon m_varIcon;
