@@ -196,14 +196,17 @@ IAssistProposal *RustCompletionAssistProcessor::perform(const AssistInterface *i
         return 0;
 
     //Save the current document to a temporary file so I can call racer on it
-    QFile tmpsrc(m_interface->fileName() + QLatin1String(".racer.rs"));
-    if(!tmpsrc.open(QFile::ReadWrite)) return 0;
-    const QTextDocument *doc = m_interface->textDocument();
-    QString fullDoc = doc->toPlainText();
-    QTextStream tmpstream(&tmpsrc);
-    tmpstream << fullDoc;
-    tmpstream.flush();
+    QTemporaryFile tmpsrc;
+    if (!tmpsrc.open())
+        return 0;
 
+    const QTextDocument *doc = m_interface->textDocument();
+
+    {
+        const QString fullDoc = doc->toPlainText();
+        QTextStream tmpstream(&tmpsrc);
+        tmpstream << fullDoc;
+    }
 
     int pos = m_interface->position() - 1;
     QChar ch = m_interface->characterAt(pos);
@@ -254,7 +257,6 @@ IAssistProposal *RustCompletionAssistProcessor::perform(const AssistInterface *i
 
     m_startPosition = pos + 1;
 
-    tmpsrc.remove();
     return new GenericProposal(m_startPosition, m_completions);
 }
 
